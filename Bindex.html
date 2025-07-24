@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UgandaChess - Play Chess Online</title>
+
+  <!-- Chessground CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/chessground@8.0.0/dist/chessground.min.css"
+  />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f2f2f2;
+    }
+    header {
+      background: #000;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .logo img {
+      height: 40px;
+    }
+    #board {
+      width: 90vw;
+      max-width: 420px;
+      margin: 2rem auto;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    button,
+    select {
+      padding: 0.5rem;
+      margin: 0.5rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Flag_of_Uganda.svg"
+        alt="Uganda flag"
+      />
+      <h1>UgandaChess</h1>
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg"
+        alt="Knight icon"
+      />
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/7/73/Lion_waiting_in_Namibia.jpg"
+        alt="Lion icon"
+        style="height: 40px; border-radius: 5px"
+      />
+    </div>
+    <p>Play chess, create tournaments, and support Ugandan chess</p>
+  </header>
+
+  <main>
+    <div class="controls">
+      <label for="timeControl">Time Control:</label>
+      <select id="timeControl">
+        <option value="5">5 mins</option>
+        <option value="10">10 mins</option>
+        <option value="15">15 mins</option>
+        <option value="custom">Custom</option>
+      </select>
+      <br />
+      <label for="boardColor">Board Theme:</label>
+      <select id="boardColor">
+        <option value="default">Classic</option>
+        <option value="blue">Blue</option>
+        <option value="brown">Brown</option>
+      </select>
+      <br />
+      <button id="startGameBtn">Start Game</button>
+      <button onclick="alert('Tournament mode coming soon!')">Create Tournament</button>
+    </div>
+
+    <div id="board"></div>
+  </main>
+
+  <audio id="moveSound" src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Chess_move_sound.mp3"></audio>
+
+  <!-- Chess.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.3/chess.min.js"></script>
+  <!-- Chessground JS -->
+  <script src="https://unpkg.com/chessground@8.0.0/dist/chessground.min.js"></script>
+
+  <script>
+    // Initialize chess.js game instance
+    const game = new Chess();
+
+    // Define Chessground board instance (will initialize later)
+    let chessground = null;
+
+    // Board themes styles
+    const boardThemes = {
+      default: {
+        light: "#f0d9b5",
+        dark: "#b58863",
+      },
+      blue: {
+        light: "#cde2f4",
+        dark: "#487eb0",
+      },
+      brown: {
+        light: "#e8d3b3",
+        dark: "#a0713d",
+      },
+    };
+
+    // Create Chessground configuration with theme colors
+    function createBoard(theme = "default") {
+      const colors = boardThemes[theme] || boardThemes.default;
+
+      // Destroy previous board if exists
+      if (chessground) chessground.destroy();
+
+      // Create Chessground instance
+      chessground = Chessground(document.getElementById("board"), {
+        draggable: true,
+        orientation: "white",
+        highlight: true,
+        movable: {
+          free: false,
+          color: "both",
+          showDests: true,
+          events: {
+            after: onMove,
+          },
+        },
+        drawable: {
+          enabled: false,
+        },
+        animation: {
+          enabled: true,
+        },
+        pieces: {
+          style: "cburnett", // classic chess set style
+        },
+        coordinates: true,
+        style: {
+          cssClass: "my-chessboard",
+          light: colors.light,
+          dark: colors.dark,
+        },
+      });
+
+      // Apply custom CSS for squares
+      document.documentElement.style.setProperty(
+        "--cg-square-light",
+        colors.light
+      );
+      document.documentElement.style.setProperty("--cg-square-dark", colors.dark);
+    }
+
+    // Handle moves on the board
+    function onMove(from, to) {
+      const move = game.move({ from, to, promotion: "q" });
+      if (move === null) {
+        // Illegal move - revert on board
+        chessground.cancelMove();
+        return;
+      }
+      document.getElementById("moveSound").play();
+      // Update board position to game FEN (in case of promotion etc)
+      chessground.set({ fen: game.fen() });
+    }
+
+    // Start a new game
+    function startNewGame() {
+      game.reset();
+      createBoard(document.getElementById("boardColor").value);
+      chessground.set({ fen: game.fen() });
+    }
+
+    // Listen for theme changes
+    document.getElementById("boardColor").addEventListener("change", (e) => {
+      createBoard(e.target.value);
+      chessground.set({ fen: game.fen() });
+    });
+
+    // Start button listener
+    document.getElementById("startGameBtn").addEventListener("click", () => {
+      startNewGame();
+    });
+
+    // Initialize board on page load with default theme and starting position
+    window.onload = () => {
+      createBoard();
+      chessground.set({ fen: game.fen() });
+    };
+  </script>
+</body>
+</html>
