@@ -3,11 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UgandaChess Multiplayer</title>
-
-  <!-- Chessground CSS -->
+  <title>UgandaChess - Offline Version</title>
   <link rel="stylesheet" href="https://unpkg.com/chessground@8.0.0/dist/chessground.min.css" />
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,8 +14,8 @@
       padding: 0;
     }
     h1 {
-      background: black;
-      color: white;
+      background: #000;
+      color: #fff;
       margin: 0;
       padding: 1rem;
     }
@@ -48,67 +45,40 @@
   </style>
 </head>
 <body>
-  <h1>UgandaChess - Multiplayer</h1>
+  <h1>UgandaChess - Offline</h1>
   <div id="board"></div>
   <button onclick="copyPGN()">Copy PGN</button>
   <div id="pgn"></div>
 
-  <!-- External Libraries -->
-  <script src="https://unpkg.com/chessground@8.0.0/dist/chessground.min.js"></script>
   <script src="https://unpkg.com/chess.js@1.0.0-beta.3/chess.min.js"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const gameRef = ref(db, 'games/uganda');
-
+  <script src="https://unpkg.com/chessground@8.0.0/dist/chessground.min.js"></script>
+  <script>
     const game = new Chess();
-    const board = Chessground(document.getElementById('board'), {
+    const board = Chessground(document.getElementById("board"), {
       draggable: true,
       movable: {
+        color: "white",
         free: false,
-        color: 'white',
         events: {
           after(from, to) {
-            const move = game.move({ from, to, promotion: 'q' });
+            const move = game.move({ from, to, promotion: "q" });
             if (move) {
               board.set({ fen: game.fen() });
-              set(gameRef, { fen: game.fen(), pgn: game.pgn() });
-              document.getElementById('pgn').innerText = game.pgn();
+              document.getElementById("pgn").innerText = game.pgn();
             } else {
               board.cancelMove();
             }
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
-    onValue(gameRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data && data.fen !== game.fen()) {
-        game.load(data.fen);
-        board.set({ fen: data.fen });
-        document.getElementById('pgn').innerText = game.pgn();
-      }
-    });
-
-    window.copyPGN = function () {
-      navigator.clipboard.writeText(game.pgn())
-        .then(() => alert('PGN copied!'))
-        .catch(() => alert('Failed to copy PGN'));
-    };
+    function copyPGN() {
+      const pgnText = game.pgn();
+      navigator.clipboard.writeText(pgnText)
+        .then(() => alert("PGN copied!"))
+        .catch(() => alert("Copy failed."));
+    }
   </script>
 </body>
 </html>
