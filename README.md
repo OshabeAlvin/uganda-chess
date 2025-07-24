@@ -1,1 +1,1 @@
-# uganda-chess
+index.html
