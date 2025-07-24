@@ -4,13 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>UgandaChess</title>
-
-  <!-- Chessground styles -->
   <link rel="stylesheet" href="https://unpkg.com/chessground@8.0.0/dist/chessground.min.css" />
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
+      background: #f8f8f8;
     }
     #board {
       width: 400px;
@@ -23,12 +22,10 @@
   <h1>UgandaChess</h1>
   <div id="board"></div>
 
-  <!-- Load libraries -->
   <script src="https://unpkg.com/chess.js@1.0.0-beta.3/chess.min.js"></script>
   <script src="https://unpkg.com/chessground@8.0.0/dist/chessground.min.js"></script>
 
   <script>
-    // Wait for page to fully load
     window.onload = () => {
       const game = new Chess();
       const board = Chessground(document.getElementById("board"), {
