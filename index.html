@@ -3,146 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UgandaChess - Play Chess Online</title>
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/css/chessboard.min.css"
-  />
+  <title>UgandaChess</title>
+
+  <!-- Chessground styles -->
+  <link rel="stylesheet" href="https://unpkg.com/chessground@8.0.0/dist/chessground.min.css" />
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f2f2f2;
-    }
-    header {
-      background: #000;
-      color: white;
-      padding: 1rem;
+      font-family: sans-serif;
       text-align: center;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    .logo img {
-      height: 40px;
     }
     #board {
-      width: 90vw;
-      max-width: 400px;
-      margin: 2rem auto;
-    }
-    .controls {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    button,
-    select {
-      padding: 0.5rem;
-      margin: 0.5rem;
+      width: 400px;
+      height: 400px;
+      margin: 20px auto;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Flag_of_Uganda.svg"
-        alt="Uganda flag"
-      />
-      <h1>UgandaChess</h1>
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg"
-        alt="Knight icon"
-      />
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/7/73/Lion_waiting_in_Namibia.jpg"
-        alt="Lion icon"
-        style="height: 40px; border-radius: 5px"
-      />
-    </div>
-    <p>Play chess, create tournaments, and support Ugandan chess</p>
-  </header>
+  <h1>UgandaChess</h1>
+  <div id="board"></div>
 
-  <main>
-    <div class="controls">
-      <label for="timeControl">Time Control:</label>
-      <select id="timeControl">
-        <option value="5">5 mins</option>
-        <option value="10">10 mins</option>
-        <option value="15">15 mins</option>
-        <option value="custom">Custom</option>
-      </select>
-      <br />
-      <label for="boardColor">Board Theme:</label>
-      <select id="boardColor">
-        <option value="white">Classic</option>
-        <option value="blue">Blue</option>
-        <option value="brown">Brown</option>
-      </select>
-      <br />
-      <button onclick="startNewGame()">Start Game</button>
-      <button onclick="alert('Tournament mode coming soon!')">Create Tournament</button>
-    </div>
+  <!-- Load libraries -->
+  <script src="https://unpkg.com/chess.js@1.0.0-beta.3/chess.min.js"></script>
+  <script src="https://unpkg.com/chessground@8.0.0/dist/chessground.min.js"></script>
 
-    <div id="board"></div>
-  </main>
-
-  <audio id="moveSound" src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Chess_move_sound.mp3"></audio>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/js/chessboard.min.js"></script>
   <script>
-    const boardTheme = {
-      white: { light: "#f0d9b5", dark: "#b58863" },
-      blue: { light: "#cde2f4", dark: "#487eb0" },
-      brown: { light: "#e8d3b3", dark: "#a0713d" },
+    // Wait for page to fully load
+    window.onload = () => {
+      const game = new Chess();
+      const board = Chessground(document.getElementById("board"), {
+        draggable: true,
+        movable: {
+          color: "white",
+          free: false,
+          events: {
+            after: (from, to) => {
+              const move = game.move({ from, to, promotion: 'q' });
+              if (!move) {
+                board.cancelMove();
+              } else {
+                board.set({ fen: game.fen() });
+              }
+            }
+          }
+        }
+      });
     };
-
-    const game = new Chess();
-    let board;
-
-    function makeMove(source, target) {
-      const move = game.move({ from: source, to: target, promotion: "q" });
-      if (move === null) return "snapback";
-      document.getElementById("moveSound").play();
-    }
-
-    function onSnapEnd() {
-      board.position(game.fen());
-    }
-
-    function startNewGame() {
-      game.reset();
-      board.start();
-    }
-
-    function updateBoardColor() {
-      const theme = document.getElementById("boardColor").value;
-      const colors = boardTheme[theme];
-      document.querySelectorAll(".white-1e1d7").forEach(
-        (sq) => (sq.style.backgroundColor = colors.light)
-      );
-      document.querySelectorAll(".black-3c85d").forEach(
-        (sq) => (sq.style.backgroundColor = colors.dark)
-      );
-    }
-
-    board = Chessboard("board", {
-      draggable: true,
-      position: "start",
-      onDrop: makeMove,
-      onSnapEnd: onSnapEnd,
-    });
-
-    document.getElementById("boardColor").addEventListener("change", () => {
-      updateBoardColor();
-    });
-
-    // Set initial board colors
-    window.onload = () => updateBoardColor();
   </script>
 </body>
 </html>
